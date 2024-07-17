@@ -1,15 +1,7 @@
 import requests
-import json
 
 
-import openmeteo_requests
-
-import requests_cache
-from retry_requests import retry
-
-# Setup the Open-Meteo API client with cache and retry on error
-
-def get_response_json(city: str) -> dict:
+def get_response_from_yandex_api(city: str) -> dict:
     # Отправляет запрос в Яндекс API и возвращает словарь с данными о запрашиваемом городе(в том числе и координаты)
     res = requests.get(
         f'https://geocode-maps.yandex.ru/1.x/?apikey=c664bfdb-8c58-4bb8-877a-27df0b6e5f29&geocode={city}&format=json')
@@ -34,30 +26,49 @@ def get_coordinates(d: dict) -> str:
     return result
 
 
-if __name__ == '__main__':
-    city = input('Ввведите название города:')
-    response = get_response_json(city=city)
-    coordinates = get_coordinates(response)
-    longitude, latitude = [round(float(i), 2) for i in coordinates.split()] # Преобразуем строку с координатами в долготу и широту
+def get_longitude_and_latitude(coord: str) -> list[float]:
+    # Преобразует строку с координатами во float с 2 знаками после запятой и возвращает результат
+    # Первое значение - долгота, второе - широта
+    return [round(float(i), 2) for i in coord.split()]
 
-    # cache_session = requests_cache.CachedSession('.cache', expire_after=3600)
-    # retry_session = retry(cache_session, retries=5, backoff_factor=0.2)
-    # openmeteo = openmeteo_requests.Client(session=retry_session)
 
-    # Make sure all required weather variables are listed here
-    # The order of variables in hourly or daily is important to assign them correctly below
+def get_data_temperature(long: float, lat: float) -> dict:
+    # Отправляет запрос к API open-meteo.com и возвращает ответ в виде словаря
+    # Запрос на текущую температуру(current) и почасовую температуру(hourly) в течении текущих суток(forecast_days)
     url = "https://api.open-meteo.com/v1/forecast"
     params = {
-        "latitude": latitude,
-        "longitude": longitude,
+        "latitude": lat,
+        "longitude": long,
         "hourly": "temperature_2m",
-        "forecast_days": 1
+        "forecast_days": 1,
+        "current": "temperature_2m"
     }
     responses = requests.get(url, params=params)
+    return responses.json()
 
-    # Process first location. Add a for-loop for multiple locations or weather models
-    print(responses.json()['hourly']['temperature_2m'][-1])
-    # print(f"Coordinates {response.Latitude()}°N {response.Longitude()}°E")
-    # print(f"Elevation {response.Elevation()} m asl")
-    # print(f"Timezone {response.Timezone()} {response.TimezoneAbbreviation()}")
-    # print(f"Timezone difference to GMT+0 {response.UtcOffsetSeconds()} s")
+
+def get_current_temperature(data: dict) -> float:
+    return data['current']['temperature_2m']
+
+
+def get_temperature_for_the_near_future(data: dict) -> list:
+    return data['hourly']['temperature_2m']
+
+
+def get_time_for_the_near_future(data: dict) -> list:
+    return data['hourly']['time']
+
+
+if __name__ == '__main__':
+    city_name = input('Ввведите название города:')
+    data = get_response_from_yandex_api(city=city_name)
+    coordinates = get_coordinates(d=data)
+    longitude, latitude = get_longitude_and_latitude(coord=coordinates)
+    data_temperature = get_data_temperature(long=longitude, lat=latitude)
+    current_temperature = get_current_temperature(data=data_temperature)
+    near_future_temperature = get_temperature_for_the_near_future(data=data_temperature)
+    near_future_time = get_time_for_the_near_future(data=data_temperature)
+
+    print(f'Текущая температура: {current_temperature}')
+    print(f'Температура в течении дня: {near_future_temperature}')
+    print(f'Время: {near_future_time}')

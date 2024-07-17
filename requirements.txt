@@ -4,8 +4,6 @@ certifi==2024.7.4
 charset-normalizer==3.3.2
 flatbuffers==24.3.25
 idna==3.7
-openmeteo_requests==1.2.0
-openmeteo_sdk==1.11.11
 platformdirs==4.2.2
 requests==2.32.3
 requests-cache==1.2.1
