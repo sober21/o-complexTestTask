@@ -59,16 +59,17 @@ def get_time_for_the_near_future(data: dict) -> list:
     return data['hourly']['time']
 
 
-if __name__ == '__main__':
-    city_name = input('Ввведите название города:')
-    data = get_response_from_yandex_api(city=city_name)
-    coordinates = get_coordinates(d=data)
+def main_logic(city: str) -> float:
+    data_from_yandex_api = get_response_from_yandex_api(city=city)
+    coordinates = get_coordinates(d=data_from_yandex_api)
     longitude, latitude = get_longitude_and_latitude(coord=coordinates)
     data_temperature = get_data_temperature(long=longitude, lat=latitude)
     current_temperature = get_current_temperature(data=data_temperature)
     near_future_temperature = get_temperature_for_the_near_future(data=data_temperature)
     near_future_time = get_time_for_the_near_future(data=data_temperature)
+    return current_temperature
 
-    print(f'Текущая температура: {current_temperature}')
-    print(f'Температура в течении дня: {near_future_temperature}')
-    print(f'Время: {near_future_time}')
+
+if __name__ == '__main__':
+    city_name = input('Ввведите название города:')
+    main_logic(city_name)
