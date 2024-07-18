@@ -1,4 +1,9 @@
+"""
+Логика получения тепмературы воздуха
+"""
+
 import requests
+from datetime import datetime
 
 
 def get_response_from_yandex_api(city: str) -> dict:
@@ -32,6 +37,7 @@ def get_longitude_and_latitude(coord: str) -> list[float]:
     return [round(float(i), 2) for i in coord.split()]
 
 
+# Вот тут и понадобятся координаты, потому что open-meteo отдаёт данные только по координатам
 def get_data_temperature(long: float, lat: float) -> dict:
     # Отправляет запрос к API open-meteo.com и возвращает ответ в виде словаря
     # Запрос на текущую температуру(current) и почасовую температуру(hourly) в течении текущих суток(forecast_days)
@@ -39,9 +45,10 @@ def get_data_temperature(long: float, lat: float) -> dict:
     params = {
         "latitude": lat,
         "longitude": long,
-        "hourly": "temperature_2m",
-        "forecast_days": 1,
-        "current": "temperature_2m"
+        "current": "temperature_2m",
+        "daily": ["temperature_2m_max", "temperature_2m_min"],
+        "timezone": "Europe/Moscow",
+        "forecast_days": 3
     }
     responses = requests.get(url, params=params)
     return responses.json()
@@ -51,25 +58,37 @@ def get_current_temperature(data: dict) -> float:
     return data['current']['temperature_2m']
 
 
-def get_temperature_for_the_near_future(data: dict) -> list:
-    return data['hourly']['temperature_2m']
+def get_max_temperature_for_3_days(data: dict) -> list:
+    return data['daily']['temperature_2m_max']
 
 
-def get_time_for_the_near_future(data: dict) -> list:
-    return data['hourly']['time']
+def get_min_temperature_for_3_days(data: dict) -> list:
+    return data['daily']['temperature_2m_min']
 
 
-def main_logic(city: str) -> float:
+def get_time_for_3_days(data: dict) -> list:
+    return data['daily']['time']
+
+
+def get_data_temperature_for_3_days(minimum: list, maximum: list, dt: list) -> dict:
+    # Группирует максмальную и минимальную температуры с соответствующим днём и возвращает результат
+    return dict(zip(dt, list(zip(minimum, maximum))))
+
+
+def main_func_logic_weather(city: str) -> float:
     data_from_yandex_api = get_response_from_yandex_api(city=city)
     coordinates = get_coordinates(d=data_from_yandex_api)
     longitude, latitude = get_longitude_and_latitude(coord=coordinates)
     data_temperature = get_data_temperature(long=longitude, lat=latitude)
     current_temperature = get_current_temperature(data=data_temperature)
-    near_future_temperature = get_temperature_for_the_near_future(data=data_temperature)
-    near_future_time = get_time_for_the_near_future(data=data_temperature)
-    return current_temperature
+    max_temperature = get_max_temperature_for_3_days(data=data_temperature)
+    min_temperature = get_min_temperature_for_3_days(data=data_temperature)
+    dt = get_time_for_3_days(data=data_temperature)
+    res = get_data_temperature_for_3_days(minimum=min_temperature, maximum=max_temperature, dt=dt)
+    return res
 
 
 if __name__ == '__main__':
-    city_name = input('Ввведите название города:')
-    main_logic(city_name)
+    # city_name = input('Ввведите название города:')
+    print(main_func_logic_weather('Воронеж'))
+    # print(get_response_from_yandex_api('Воронеж'))
