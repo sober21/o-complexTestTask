@@ -9,9 +9,9 @@ def index():
     if request.method == 'POST':
         if request.form['city']:
             city = request.form['city']
-            temperature = main_func_logic_weather(city)
-            return render_template('index.html', res=temperature)
+            cur_temp, list_temp = main_func_logic_weather(city)
+            return render_template('index.html', cur_temp=cur_temp, list_temp=list_temp, city=city)
         else:
-            res = 'Город не указан'
-            return render_template('index.html', res=res)
+            city = 'Город не указан'
+            return render_template('index.html', city=city)
     return render_template('index.html')
