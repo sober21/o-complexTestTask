@@ -15,7 +15,39 @@
 
                     <form class="input-group input-group-sm mb-3" method="post">
                     <span class="input-group-text" id="inputGroup-sizing-sm">Город</span>
-                    <input type="text" class="form-control" name="city" aria-label="Sizing example input" aria-describedby="inputGroup-sizing-sm" placeholder="Введите название города">
+                    <input type="text" class="form-control" name="city" list="popular-cities" aria-label="Sizing example input" aria-describedby="inputGroup-sizing-sm" placeholder="Введите название города">
+                    <datalist id="popular-cities">
+                        <option value="Москва"></option>
+                        <option value="Воронеж"></option>
+                        <option value="Самара"></option>
+                        <option value="Казань"></option>
+                        <option value="Санкт-Петербург"></option>
+                        <option value="Екатеринбург"></option>
+                        <option value="Пермь"></option>
+                        <option value="Тула"></option>
+                        <option value="Тверь"></option>
+                        <option value="Челябинск"></option>
+                        <option value="Краснодар"></option>
+                        <option value="Ростов"></option>
+                        <option value="Красноярск"></option>
+                        <option value="Ставрополь"></option>
+                        <option value="Омск"></option>
+                        <option value="Новосибирск"></option>
+                        <option value="Волгоград"></option>
+                        <option value="Оренбург"></option>
+                        <option value="Махачкала"></option>
+                        <option value="Грозный"></option>
+                        <option value="Владикавказ"></option>
+                        <option value="Владивосток"></option>
+                        <option value="Хабаровск"></option>
+                        <option value="Чита"></option>
+                        <option value="Якутск"></option>
+                        <option value="Мурманск"></option>
+                        <option value="Новороссийск"></option>
+                        <option value="Севастополь"></option>
+                        <option value="Саратов"></option>
+                        <option value="Белгород"></option>
+                    </datalist>
                     <input class="btn btn-primary" type="submit" value="Узнать">
                     </form>
                 <h2>{{ city }}</h2>
